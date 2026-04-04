@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "text": "Learn React",
+      "completed": false
+    },
+    {
+      "id": 2,
+      "text": "Build Task Manager",
+      "completed": false
+    },
+    {
+      "id": 3,
+      "text": "Understand useReducer",
+      "completed": true
+    }
+  ]
+}

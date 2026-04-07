@@ -1,102 +1,82 @@
 import React, { useReducer, useEffect, useState } from "react";
-import { initialState, reducer } from "./appReducer";
-import { Trash2, Pencil, Wrench, Plus } from "lucide-react";
+import appReducer, { initialState } from "./appReducer";
+import { Trash2, Pencil, Plus } from "lucide-react";
+import axios from "axios";
 
 const Store = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [newTaskText, setNewTaskText] = useState("");
+  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [text, setText] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchdata = async () => {
       try {
-        const res = await fetch("http://localhost:3000/tasks");
-        const data = await res.json();
-        dispatch({ type: "SET_DATA", payload: data });
+        const res = await axios.get("http://localhost:3000/tasks");
+        dispatch({ type: "SET_DATA", payload: res.data });
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     };
-    fetchData();
+    fetchdata();
   }, []);
 
-  // Add new task
-  const handleAddTask = () => {
-    if (!newTaskText.trim()) return;
-    const newTask = {
-      id: Date.now(), // simple unique id
-      text: newTaskText,
-      completed: false,
-    };
-    dispatch({ type: "ADD_TASK", payload: newTask });
-    setNewTaskText("");
-  };
 
-  // Toggle task completion
-  const handleToggle = (task) => {
-    dispatch({
-      type: "UPDATE_TASK",
-      payload: { ...task, completed: !task.completed },
-    });
-  };
-
-  // Delete task
-  const handleDelete = (id) => {
-    dispatch({ type: "DELETE_TASK", payload: id });
-  };
+  function filter(e)
+  {
+    dispatch({type:"FilterData",payload:e})
+  }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-amber-500">Task List</h1>
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center p-6">
+      {/* Title */}
+      <h1 className="text-3xl font-bold text-white mb-6">Task Pro 🚀</h1>
 
       {/* Add Task */}
-      <div className="flex mb-4 space-x-2">
+      <div className="flex w-full max-w-xl mb-6">
         <input
           type="text"
-          className="flex-1 border rounded-lg p-2"
           placeholder="Enter new task..."
-          value={newTaskText}
-          onChange={(e) => setNewTaskText(e.target.value)}
+          value={text}
+          onChange={(e) => filter(e.target.value)}
+          
+          className="flex-1 p-3 rounded-l-xl outline-none bg-gray-300 text-black"
         />
-        <button
-          onClick={handleAddTask}
-          className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 flex items-center space-x-1"
-        >
-          <Plus size={16} />
-          <span>Add</span>
+        <button className="bg-blue-500 px-4 rounded-r-xl text-white hover:bg-blue-600 flex items-center gap-2">
+          <Plus size={18} />
+          Add
         </button>
       </div>
 
       {/* Task List */}
-      <ul className="space-y-3">
-        {state.tasks.map((task) => (
+      <ul className="w-full max-w-xl space-y-4">
+        {state.tasks.map((t) => (
           <li
-            key={task.id}
-            className="flex justify-between items-center bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow"
+            key={t.id}
+            className="bg-white rounded-2xl shadow-lg p-4 flex justify-between items-center"
           >
-            <div onClick={() => handleToggle(task)} className="cursor-pointer">
-              <p className="font-medium text-gray-900">{task.text}</p>
-              <p className="text-sm text-gray-500">ID: {task.id}</p>
+            {/* Task Info */}
+            <div className="flex-5">
+              <p className="text-sm text-gray-500">ID: {t.id}</p>
+              <p className="font-semibold text-gray-800">{t.text}</p>
             </div>
 
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold cursor-pointer ${
-                task.completed
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
+            {/* Status */}
+            <div
+              className={`p-2 rounded-full text-center flex-3 text-sm font-semibold ${
+                t.completed
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
-              onClick={() => handleToggle(task)}
             >
-              {task.completed ? "Done" : "Pending"}
-            </span>
+              <p>{t.completed ? "Completed" : "Pending"}</p>
+            </div>
 
-            {/* Icons */}
-            <div className="flex items-center space-x-3 text-gray-500">
-              <Pencil className="hover:text-blue-500 cursor-pointer" />
-              <Trash2
-                className="hover:text-red-500 cursor-pointer"
-                onClick={() => handleDelete(task.id)}
+            {/* Actions */}
+            <div className="flex flex-3 justify-center gap-3 text-gray-500">
+              <Pencil
+                className="cursor-pointer hover:text-blue-500"
+                size={18}
               />
-              <Wrench className="hover:text-yellow-500 cursor-pointer" />
+              <Trash2 className="cursor-pointer hover:text-red-500" size={18} />
             </div>
           </li>
         ))}
